@@ -1,0 +1,183 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        nav {
+            background: #dc3545;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+        }
+        
+        .hero h1 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+        
+        .feature-card {
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        input, select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .inventory-container {
+            padding: 2rem;
+        }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .blood-group-card {
+            padding: 5rem;
+            background: rgb(228, 224, 224);
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+       
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Donate Life</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="donor.html">Donor Registration</a></li>
+            <li><a href="acceptor.html">Acceptor Registration</a></li>
+            <li><a href="inventory.html">Blood Inventory</a></li>
+        </ul>
+    </nav>
+
+    <div class="inventory-container">
+        <h2>Blood Inventory Status</h2>
+        <div class="inventory-grid" id="inventoryGrid">
+            <!-- Blood groups will be populated by JavaScript -->
+        </div>
+    </div>
+    <script>
+        // Blood inventory data
+let bloodInventory = {
+    'A+': 10,
+    'A-': 5,
+    'B+': 15,
+    'B-': 7,
+    'AB+': 8,
+    'AB-': 3,
+    'O+': 20,
+    'O-': 12
+};
+
+// Handle donor registration
+if (document.getElementById('donorForm')) {
+    document.getElementById('donorForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Donor registration successful!');
+        this.reset();
+    });
+}
+
+// Handle acceptor registration
+if (document.getElementById('acceptorForm')) {
+    document.getElementById('acceptorForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Blood request submitted successfully!');
+        this.reset();
+    });
+}
+
+// Display inventory
+if (document.getElementById('inventoryGrid')) {
+    const inventoryGrid = document.getElementById('inventoryGrid');
+    
+    for (let bloodGroup in bloodInventory) {
+        const card = document.createElement('div');
+        card.className = 'blood-group-card';
+        card.innerHTML = `
+            <h1>${bloodGroup}</h1>
+            <p>${bloodInventory[bloodGroup]} units available</p>
+        `;
+        inventoryGrid.appendChild(card);
+    }
+}
+    </script>
+</body>
+</html>
