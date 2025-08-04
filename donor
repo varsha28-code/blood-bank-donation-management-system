@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donor Registration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    nav {
+      background: #dc3545;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+    }
+
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    input, select {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background: #dc3545;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 0.5rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    .error {
+      border: 1px solid red;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Donate Life</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="donor.html">Donor Registration</a></li>
+      <li><a href="acceptor.html">Acceptor Registration</a></li>
+      <li><a href="inventory.html">Blood Inventory</a></li>
+    </ul>
+  </nav>
+
+  <div class="form-container">
+    <h2>Donor Registration</h2>
+    <form id="donorForm" autocomplete="off" method="post" name="google-sheet">
+      <input type="text" id="fullname" name="fullname" placeholder="Full Name" required pattern="[A-Za-z\s'-]{2,50}" title="Full name must be 2-50 characters and contain only letters, spaces, hyphens or apostrophes.">
+      <span class="error-message" id="fullnameError"></span>
+
+      <input type="email" id="email" name="email" placeholder="Email" required>
+      <span class="error-message" id="emailError"></span>
+
+      <input type="tel" id="phone" name="phone" placeholder="Phone Number" required maxlength="10" pattern="^[6-9]\d{9}$" title="Please enter a valid 10-digit phone number">
+      <span class="error-message" id="phoneError"></span>
+
+      <select name="bloodgroup" id="bloodgroup" required>
+        <option value="">Select Blood Group</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+      </select>
+      <span class="error-message" id="bloodgroupError"></span>
+
+      <input type="number" id="age" name="age" placeholder="Age" required min="19" max="64">
+      <span class="error-message" id="ageError"></span>
+
+      <input type="text" name="address" id="address" placeholder="Address" required>
+      <span class="error-message" id="addressError"></span>
+
+      <button type="submit" name="submit" class="btn">Register as Donor</button>
+    </form>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwW9g1cUEf48NTCFUxJu2RGt7Gb6eY_U00AvPWh5AlLHCYEew3TTfB8k75tl87eaCv6sg/exec';
+    const form = document.forms['google-sheet'];
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearErrors();
+
+      const fullname = form.fullname;
+      const email = form.email;
+      const phone = form.phone;
+      const bloodgroup = form.bloodgroup;
+      const age = form.age;
+      const address = form.address;
+
+      let isValid = true;
+
+      // Full name validation
+      const namePattern = /^[A-Za-z\s'-]{2,50}$/;
+      if (!namePattern.test(fullname.value)) {
+        showError(fullname, "fullnameError", "Please enter a valid name.");
+        isValid = false;
+      }
+
+      // Email validation
+      if (!email.value.includes("@") || !email.value.includes(".")) {
+        showError(email, "emailError", "Please enter a valid email.");
+        isValid = false;
+      }
+
+      // Phone validation
+      const phonePattern = /^[6-9]\d{9}$/;
+      if (!phonePattern.test(phone.value)) {
+        showError(phone, "phoneError", "Enter a valid 10-digit phone number.");
+        isValid = false;
+      }
+
+      // Bloodgroup
+      if (bloodgroup.value === "") {
+        showError(bloodgroup, "bloodgroupError", "Please select a blood group.");
+        isValid = false;
+      }
+
+      // Age validation
+      const ageVal = parseInt(age.value);
+      if (isNaN(ageVal) || ageVal < 19 || ageVal > 64) {
+        showError(age, "ageError", "Age must be between 19 and 64.");
+        isValid = false;
+      }
+
+      // Address validation
+      if (address.value.trim().length < 5) {
+        showError(address, "addressError", "Address must be at least 5 characters long.");
+        isValid = false;
+      }
+
+      // Submit if valid
+      if (isValid) {
+        fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+          .then(response => {
+            alert("Donor registration successful!");
+            form.reset();
+          })
+          .catch(error => console.error('Error!', error.message));
+      }
+    });
+
+    function showError(inputElem, errorElemId, message) {
+      inputElem.classList.add("error");
+      document.getElementById(errorElemId).textContent = message;
+    }
+
+    function clearErrors() {
+      const errors = document.querySelectorAll(".error-message");
+      errors.forEach(e => e.textContent = "");
+
+      const fields = document.querySelectorAll("input, select");
+      fields.forEach(f => f.classList.remove("error"));
+    }
+  </script>
+</body>
+</html>
