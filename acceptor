@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Acceptor Registration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    nav {
+      background: #dc3545;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    nav ul {
+      display: flex;
+      list-style: none;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input, select {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .btn {
+      padding: 0.8rem 1.5rem;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .valid {
+      border: 2px solid green;
+    }
+    .invalid {
+      border: 2px solid red;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.85rem;
+      display: none;
+      margin-top: -0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Donate Life</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="donor.html">Donor Registration</a></li>
+      <li><a href="acceptor.html">Acceptor Registration</a></li>
+      <li><a href="inventory.html">Blood Inventory</a></li>
+    </ul>
+  </nav>
+
+  <div class="form-container">
+    <h2>Acceptor Registration</h2>
+    <form id="acceptorForm" autocomplete="off" method="post" name="google-sheet">
+      <input type="text" placeholder="Patient Name" name="patientName" id="patientName" required>
+      <span class="error-message" id="patientNameError">Enter 3–50 alphabetic characters.</span>
+
+      <input type="email" placeholder="Email" name="email" id="email" required>
+      <span class="error-message" id="emailError">Enter a valid email.</span>
+
+      <input type="tel" id="phone" placeholder="Phone Number" name="phone" required maxlength="10">
+      <span class="error-message" id="phoneError">Enter a valid 10-digit phone number.</span>
+
+      <select name="bloodgroup" id="bloodgroup" required>
+        <option value="">Select Blood Group Needed</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+      </select>
+      <span class="error-message" id="bloodgroupError">Please select a blood group.</span>
+
+      <input type="number" placeholder="Units Required" name="units" id="units" min="1" max="10" required>
+      <span class="error-message" id="unitsError">Enter between 1 and 10 units.</span>
+
+      <input type="text" placeholder="Hospital Name" name="hospital" id="hospital" required>
+      <span class="error-message" id="hospitalError">Enter a valid hospital name.</span>
+
+      <input type="text" placeholder="Doctor Name" name="doctor" id="doctor" required>
+      <span class="error-message" id="doctorError">Enter a valid doctor name.</span>
+
+      <button type="submit" name="submit" class="btn">Request Blood</button>
+    </form>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxVpe5e2UCx398clPbirgH5IYn_YHHERahxBg1C3INNzSxATqu1K9YyZidmD78XsIDl/exec';
+    const form = document.forms['google-sheet'];
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      if (validateForm()) {
+        fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+          .then(response => {
+            alert("Acceptor registration successful!");
+            form.reset();
+            resetStyles();
+          })
+          .catch(error => console.error('Error!', error.message));
+      }
+    });
+
+    function validateForm() {
+      let isValid = true;
+
+      // Regex patterns
+      const namePattern = /^[A-Za-z\s'-]{3,50}$/;
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phonePattern = /^[6-9]\d{9}$/;
+
+      // Elements
+      const fields = [
+        { id: "patientName", pattern: namePattern, error: "patientNameError" },
+        { id: "email", pattern: emailPattern, error: "emailError" },
+        { id: "phone", pattern: phonePattern, error: "phoneError" },
+        { id: "hospital", pattern: namePattern, error: "hospitalError" },
+        { id: "doctor", pattern: namePattern, error: "doctorError" }
+      ];
+
+      // Validate text fields
+      fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const error = document.getElementById(field.error);
+        if (!field.pattern.test(input.value.trim())) {
+          input.classList.add("invalid");
+          input.classList.remove("valid");
+          error.classList.add("show");
+          isValid = false;
+        } else {
+          input.classList.add("valid");
+          input.classList.remove("invalid");
+          error.classList.remove("show");
+        }
+      });
+
+      // Validate blood group
+      const bloodgroup = document.getElementById("bloodgroup");
+      const bloodgroupError = document.getElementById("bloodgroupError");
+      if (bloodgroup.value === "") {
+        bloodgroup.classList.add("invalid");
+        bloodgroup.classList.remove("valid");
+        bloodgroupError.classList.add("show");
+        isValid = false;
+      } else {
+        bloodgroup.classList.add("valid");
+        bloodgroup.classList.remove("invalid");
+        bloodgroupError.classList.remove("show");
+      }
+
+      // Validate units
+      const units = document.getElementById("units");
+      const unitsError = document.getElementById("unitsError");
+      if (units.value < 1 || units.value > 10) {
+        units.classList.add("invalid");
+        units.classList.remove("valid");
+        unitsError.classList.add("show");
+        isValid = false;
+      } else {
+        units.classList.add("valid");
+        units.classList.remove("invalid");
+        unitsError.classList.remove("show");
+      }
+
+      return isValid;
+    }
+
+    function resetStyles() {
+      const inputs = document.querySelectorAll("input, select");
+      const errors = document.querySelectorAll(".error-message");
+      inputs.forEach(input => {
+        input.classList.remove("valid", "invalid");
+      });
+      errors.forEach(error => {
+        error.classList.remove("show");
+      });
+    }
+  </script>
+</body>
+</html>
